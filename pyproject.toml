@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inventree-adv-sheet-label"
+version = "0.0.1"
+authors = [
+  { name="melektron", email="matteo@elektron.work" },
+]
+description = "Advanced sheet label printing plugin for InvenTree which adds more features to the included plugin including printing on off-the-shelf label paper layouts"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/melektron/inventree-adv-sheet-label"
+Issues = "https://github.com/melektron/inventree-adv-sheet-label/issues"
+
+[project.entry-points."inventree_plugins"]
+AdvancedSheetLabel = 'advanced_sheet_label.printing_plugin:AdvancedLabelSheetPlugin'
