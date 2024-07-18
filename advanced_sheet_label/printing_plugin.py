@@ -1,12 +1,15 @@
 """
-Label printing plugin which supports printing multiple labels on a single page.
+Label printing plugin which supports printing multiple labels on a single page 
+arranged according to standard label sheets.
 """
 
 import logging
 import math
+import random
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.validators import MinValueValidator
 from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 
@@ -18,36 +21,66 @@ from plugin import InvenTreePlugin
 from plugin.mixins import LabelPrintingMixin, SettingsMixin
 from report.models import LabelOutput, LabelTemplate
 
-logger = logging.getLogger('inventree')
+from .layouts import LAYOUTS, LAYOUT_SELECT_OPTIONS
+
+
+_log = logging.getLogger('inventree')
+
+_plugin_instance: "AdvancedLabelSheetPlugin" = ...
+
+
+def get_default_layout() -> str:
+    """
+    Fetches the default layout setting from the database to show in form.
+    """
+    option: str = ""
+    if _plugin_instance is not ...: 
+        option = _plugin_instance.get_setting("DEFAULT_LAYOUT")
+        _log.warn(f"Using default layout from settings: {option}")
+    else:
+        option = LAYOUT_SELECT_OPTIONS[0][0]    # use the first one if there is no other option (is)
+    return option
+
+def get_default_skip() -> int:
+    """
+    Fetches the default labels skip count from the database which was stored
+    there the last time a printing job finished to indicate the next available label
+    positions.
+    """
+    skip: int = 0
+    if _plugin_instance is not ...: 
+        skip = _plugin_instance.get_setting("LABEL_SKIP_COUNTER")
+    return skip
 
 
 class AdvancedLabelPrintingOptionsSerializer(serializers.Serializer):
     """Custom printing options for the advanced label sheet plugin."""
 
-    page_size = serializers.ChoiceField(
-        choices=report.helpers.report_page_size_options(),
-        default='A4',
-        label=_('Page Size'),
-        help_text=_('Page size for the label sheet'),
+    sheet_layout = serializers.ChoiceField(
+        label='Sheet Layout',
+        help_text='Page size and label arrangement',
+        choices=LAYOUT_SELECT_OPTIONS,
+        default=get_default_layout,
+    )
+
+    count = serializers.IntegerField(
+        label='Number of Labels',
+        help_text='Number of labels to print for each kind',
+        min_value=0,
+        default=0,
     )
 
     skip = serializers.IntegerField(
-        default=0,
-        label=_('Skip Labels'),
-        help_text=_('Skip this number of labels when printing label sheets'),
+        label='Skip Labels',
+        help_text='Number of labels to skip from the top left',
         min_value=0,
+        default=get_default_skip,
     )
 
     border = serializers.BooleanField(
+        label='Border',
+        help_text='Whether to print a border around each label (useful for testing)',
         default=False,
-        label=_('Border'),
-        help_text=_('Print a border around each label'),
-    )
-
-    landscape = serializers.BooleanField(
-        default=False,
-        label=_('Landscape'),
-        help_text=_('Print the label sheet in landscape mode'),
     )
 
 
@@ -59,16 +92,41 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
     """
 
     NAME = 'AdvancedLabelSheet'
-    TITLE = _('Advanced Label Sheet Printer')
-    DESCRIPTION = _('Arrays multiple labels onto single, standard layout label sheets with advanced layout options')
+    TITLE = 'Advanced Label Sheet Printer'
+    DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets with advanced layout options'
     VERSION = '1.0.0'
-    AUTHOR = _('InvenTree contributors & melektron')
+    AUTHOR = 'InvenTree contributors & melektron'
 
     BLOCKING_PRINT = True
 
-    SETTINGS = {}
+    SETTINGS = {
+        "DEFAULT_LAYOUT": {
+            "name": "Default Sheet Layout",
+            "description": "The default sheet layout selection when printing labels",
+            "choices": LAYOUT_SELECT_OPTIONS,
+            "default": LAYOUT_SELECT_OPTIONS[0][0],
+            "required": True
+        },
+        "LABEL_SKIP_COUNTER": {
+            "name": "Label Skip Counter",
+            "description": "Global counter for auto-incrementing the default amount of labels to skip when printing. If page is full, this wraps back to zero accordingly.",
+            "default": 0,
+            "validator": [
+                int,
+                MinValueValidator(0)
+            ],
+            "hidden": True  # maybe shoudl actually show this for manual reset? but for now I'll not show it
+        }
+    }
 
     PrintingOptionsSerializer = AdvancedLabelPrintingOptionsSerializer
+
+    def __init__(self):
+        _log.warn("Initializing Advanced Sheet Label Plugin")
+        super().__init__()
+        # save instance so serializers can access it.
+        global _plugin_instance
+        _plugin_instance = self
 
     def print_labels(
         self, label: LabelTemplate, output: LabelOutput, items: list, request, **kwargs
@@ -191,7 +249,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                         )
                         html += cell
                     except Exception as exc:
-                        logger.exception('Error rendering label: %s', str(exc))
+                        _log.exception('Error rendering label: %s', str(exc))
                         html += """
                         <div class='label-sheet-cell-error'></div>
                         """
