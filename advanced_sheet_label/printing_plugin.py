@@ -6,6 +6,7 @@ arranged according to standard label sheets.
 import logging
 import math
 import random
+import typing
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -13,6 +14,7 @@ from django.core.validators import MinValueValidator
 from django.http import JsonResponse
 from django.utils.translation import gettext_lazy as _
 
+from rest_framework.request import Request
 import weasyprint
 from rest_framework import serializers
 
@@ -21,11 +23,11 @@ from plugin import InvenTreePlugin
 from plugin.mixins import LabelPrintingMixin, SettingsMixin
 from report.models import LabelOutput, LabelTemplate
 
-from .layouts import LAYOUTS, LAYOUT_SELECT_OPTIONS
+from .layouts import SheetLayout, LAYOUTS, LAYOUT_SELECT_OPTIONS
 
 
 _log = logging.getLogger('inventree')
-
+_log.setLevel(logging.DEBUG)
 _plugin_instance: "AdvancedLabelSheetPlugin" = ...
 
 
@@ -33,13 +35,10 @@ def get_default_layout() -> str:
     """
     Fetches the default layout setting from the database to show in form.
     """
-    option: str = ""
     if _plugin_instance is not ...: 
-        option = _plugin_instance.get_setting("DEFAULT_LAYOUT")
-        _log.warn(f"Using default layout from settings: {option}")
+        return _plugin_instance.get_setting("DEFAULT_LAYOUT")
     else:
-        option = LAYOUT_SELECT_OPTIONS[0][0]    # use the first one if there is no other option (is)
-    return option
+        return LAYOUT_SELECT_OPTIONS[0][0]    # use the first one if there is no other option (is)
 
 def get_default_skip() -> int:
     """
@@ -47,41 +46,53 @@ def get_default_skip() -> int:
     there the last time a printing job finished to indicate the next available label
     positions.
     """
-    skip: int = 0
     if _plugin_instance is not ...: 
-        skip = _plugin_instance.get_setting("LABEL_SKIP_COUNTER")
-    return skip
+        return _plugin_instance.label_skip_counter
+    return 0
 
 
 class AdvancedLabelPrintingOptionsSerializer(serializers.Serializer):
     """Custom printing options for the advanced label sheet plugin."""
 
     sheet_layout = serializers.ChoiceField(
-        label='Sheet Layout',
+        label='Sheet layout',
         help_text='Page size and label arrangement',
         choices=LAYOUT_SELECT_OPTIONS,
         default=get_default_layout,
     )
 
     count = serializers.IntegerField(
-        label='Number of Labels',
+        label='Number of labels',
         help_text='Number of labels to print for each kind',
         min_value=0,
-        default=0,
+        default=1,
     )
 
     skip = serializers.IntegerField(
-        label='Skip Labels',
-        help_text='Number of labels to skip from the top left',
+        label='Skip label positions',
+        help_text='Number of label positions to skip from the top left',
         min_value=0,
         default=get_default_skip,
     )
 
+    ignore_size_mismatch = serializers.BooleanField(
+        label='Ignore label size mismatch',
+        help_text="Whether to ignore that the label size doesn't match the expedted label size of the selected layout",
+        default=False
+    )
+
     border = serializers.BooleanField(
-        label='Border',
-        help_text='Whether to print a border around each label (useful for testing)',
+        label='Debug: Print border',
+        help_text='Whether to print a border around each label for testing',
         default=False,
     )
+
+    fill_color = serializers.CharField(
+        label="Debug: Label fill color",
+        help_text="Background color to fill the all the labels with. This helps make the shape and size clearer for testing.",
+        default="unset"
+    )
+
 
 
 class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugin):
@@ -122,80 +133,155 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
     PrintingOptionsSerializer = AdvancedLabelPrintingOptionsSerializer
 
     def __init__(self):
-        _log.warn("Initializing Advanced Sheet Label Plugin")
+        _log.debug("Initializing Advanced Sheet Label Plugin")
         super().__init__()
         # save instance so serializers can access it.
         global _plugin_instance
         _plugin_instance = self
+    
+    @property
+    def label_skip_counter(self) -> int:
+        return self.get_setting("LABEL_SKIP_COUNTER")
+    
+    @label_skip_counter.setter
+    def label_skip_counter(self, counter: int) -> None:
+        self.set_setting("LABEL_SKIP_COUNTER", counter)
 
-    def print_labels(
-        self, label: LabelTemplate, output: LabelOutput, items: list, request, **kwargs
-    ):
-        """Handle printing of the provided labels.
-
-        Note that we override the entire print_labels method for this plugin.
+    def _find_closest_match(self, label: LabelTemplate, prefer_round: bool) -> tuple[SheetLayout, bool, bool]:
         """
+        Finds the best matching layout to use for a specific label template.
+        If the template has specified the correct layout using the "sheet_layout" key
+        in the template metadata and that layout exists, it is used.
+        Otherwise a layout with correct size is returned, regarding a round/sharp 
+        corner preference if two exact matches of both are found.
+        If no exact size is found, the closest contendor is returned as a last
+        resort.
+
+        Returns: 
+            layout: best matching sheet label layout
+            specified: whether the layout was specified in metadata or looked for via size
+            exact: whether the result size matches exactly or not
+        """
+        # check for specified info in metadata:
+        if "sheet_layout" in label.metadata:
+            layout_code = str(label.metadata["sheet_layout"])
+            if layout_code in LAYOUTS:
+                layout = LAYOUTS[layout_code]
+                return (
+                    layout,
+                    True,
+                    layout.label_height == label.height and layout.label_width == label.width
+                )
+        
+        # find match according to size
+        # define cost function: geometric average of size and width deviation. too small is always infinite cost
+        cost_function = lambda dw, dh: float("inf") if dw < 0 or dh < 0 else math.sqrt(dw**2 + dh**2)
+        # collect exact size matches
+        exact_matches: list[SheetLayout] = []
+        # collect the closest match if nothing exact is found
+        closest_match: tuple[float, SheetLayout] = ...
+
+        # go through all layouts to find best solution
+        for _, layout in LAYOUTS.items():
+            if (    # if we have exact matches, no need to check for closest contender
+                (layout.label_height == label.height and layout.label_width == label.width)
+                or len(exact_matches) > 0
+            ):
+                exact_matches.append(layout)
+                continue
+
+            # calculate the cost and save if it was better than the last one
+            cost = cost_function(
+                layout.label_width - label.width,
+                layout.label_height - label.height,
+            )
+            _log.debug(f"{layout=}: costs {cost}")
+            if closest_match is ... or cost < closest_match[0]:
+                closest_match = (cost, layout)
+        
+        if len(exact_matches) > 0:  # exact matches have been found
+            # find the prefered match
+            for match in exact_matches:
+                if prefer_round and match.corner_radius > 0:
+                    return match, False, True
+                elif not prefer_round and match.corner_radius == 0:
+                    return match, False, True
+            # otherwise just return the first one
+            return exact_matches[0], False, True
+
+        # no exact matches found
+        return closest_match[1], False, False
+        
+    def print_labels(
+        self, label: LabelTemplate, output: LabelOutput, input_items: list, request, **kwargs
+    ):
+        """
+        Handle printing of the provided labels.
+        Note that we override the entire print_label**s** method for this plugin
+        so we can arrange them all on pages.
+        """
+
+        # extract the printing options from request
         printing_options = kwargs['printing_options']
+        sheet_layout_code: str = printing_options.get("sheet_layout", get_default_layout())
+        label_count: int = printing_options.get("count", 1)
+        skip_count: int = printing_options.get("skip", 0)
+        ignore_size_mismatch: bool = printing_options.get("ignore_size_mismatch", False)
+        border: bool = printing_options.get("border", False)
+        fill_color: str = printing_options.get("fill_color", "")
 
-        # Extract page size for the label sheet
-        page_size_code = printing_options.get('page_size', 'A4')
-        landscape = printing_options.get('landscape', False)
-        border = printing_options.get('border', False)
-        skip = int(printing_options.get('skip', 0))
+        # get sheet layout information
+        sheet_layout: SheetLayout = ...
 
-        # Extract size of page
-        page_size = report.helpers.page_size(page_size_code)
-        page_width, page_height = page_size
+        if sheet_layout_code in ["auto_round", "auto_sharp"]:   # automatic detection
+            sheet_layout, specified, is_exact = self._find_closest_match(label, sheet_layout_code == "auto_round")
+            if not is_exact and not ignore_size_mismatch:
+                if specified:
+                    raise ValidationError(f"The layout specified in the template metadata (<i>{str(sheet_layout)}</i> ) does not have the correct label size. Select '<i>Ignore label size mismatch</i>' to use it anyway.")
+                else:
+                    raise ValidationError(f"The template does not specify any valid sheet layout to use and no exact size match was found. <i>{str(sheet_layout)}</i> is the closest contender. Select '<i>Ignore label size mismatch</i>' to use it.")
+        else:   # explicit layout selection
+            try:
+                sheet_layout = LAYOUTS[sheet_layout_code]
+            except IndexError:
+                raise ValidationError(f"Sheet layout '<i>{sheet_layout_code}</i>' does not exist.")
 
-        if landscape:
-            page_width, page_height = page_height, page_width
+            if ((sheet_layout.label_height != label.height 
+                or sheet_layout.label_width != label.width)
+                and not ignore_size_mismatch):
+                raise ValidationError(f"Label size ({label.width}mm x {label.height}mm) does not match the label size required for the selected layout (<i>{str(sheet_layout)}</i>). Select '<i>Ignore label size mismatch</i>' to continue anyway.")
 
-        # Calculate number of rows and columns
-        n_cols = math.floor(page_width / label.width)
-        n_rows = math.floor(page_height / label.height)
-        n_cells = n_cols * n_rows
+        # generate the actual list of labels to print by prepending the
+        # required number of skipped null labels and multiplying each lable by the
+        # specified amount
+        items = [None] * skip_count + [
+            label
+            for item in input_items
+            for label in [item] * label_count
+        ]
 
-        if n_cells == 0:
-            raise ValidationError(_('Label is too large for page size'))
+        # calculate all the used up label positions and store the new automatic skip
+        # count for next time.
+        self.label_skip_counter = len(items) % sheet_layout.cells   # only count skips on last page
 
-        # Prepend the required number of skipped null labels
-        items = [None] * skip + list(items)
-
-        n_labels = len(items)
-
-        # Data to pass through to each page
-        document_data = {
-            'border': border,
-            'landscape': landscape,
-            'page_width': page_width,
-            'page_height': page_height,
-            'label_width': label.width,
-            'label_height': label.height,
-            'n_labels': n_labels,
-            'n_pages': math.ceil(n_labels / n_cells),
-            'n_cols': n_cols,
-            'n_rows': n_rows,
-        }
-
+        # generate all pages
         pages = []
-
         idx = 0
-
-        while idx < n_labels:
+        while idx < len(items):
             if page := self.print_page(
-                label, items[idx : idx + n_cells], request, **document_data
+                label, items[idx : idx + sheet_layout.cells], request, sheet_layout
             ):
                 pages.append(page)
 
-            idx += n_cells
+            idx += sheet_layout.cells
 
         if len(pages) == 0:
             raise ValidationError(_('No labels were generated'))
 
-        # Render to a single HTML document
-        html_data = self.wrap_pages(pages, **document_data)
+        # render to a single HTML document
+        html_data = self.wrap_pages(pages, border, fill_color, sheet_layout)
 
-        # Render HTML to PDF
+        # render HTML to PDF
         html = weasyprint.HTML(string=html_data)
         document = html.render().write_pdf()
 
@@ -204,33 +290,28 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
         output.complete = True
         output.save()
 
-    def print_page(self, label: LabelTemplate, items: list, request, **kwargs):
+    def print_page(self, label: LabelTemplate, items: list, request, sheet_layout: SheetLayout):
         """Generate a single page of labels.
 
-        For a single page, generate a simple table grid of labels.
+        For a single page, generate a table grid of labels.
         Styling of the table is handled by the higher level label template
 
         Arguments:
             label: The LabelTemplate object to use for printing
             items: The list of database items to print (e.g. StockItem instances)
             request: The HTTP request object which triggered this print job
-
-        Kwargs:
-            n_cols: Number of columns
-            n_rows: Number of rows
+            sheet_layout: the layout information of a page
         """
-        n_cols = kwargs['n_cols']
-        n_rows = kwargs['n_rows']
 
         # Generate a table of labels
         html = """<table class='label-sheet-table'>"""
 
-        for row in range(n_rows):
+        for row in range(sheet_layout.rows):
             html += "<tr class='label-sheet-row'>"
 
-            for col in range(n_cols):
+            for col in range(sheet_layout.columns):
                 # Cell index
-                idx = row * n_cols + col
+                idx = row * sheet_layout.columns + col
 
                 if idx >= len(items):
                     break
@@ -253,6 +334,9 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                         html += """
                         <div class='label-sheet-cell-error'></div>
                         """
+                
+                # overlay for border
+                html += "<div class='label-sheet-cell-overlay'></div>"
 
                 html += '</td>'
 
@@ -262,38 +346,28 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
 
         return html
 
-    def wrap_pages(self, pages, **kwargs):
+    def wrap_pages(self, pages, enable_border: bool, fill_color: str, sheet_layout: SheetLayout):
         """Wrap the generated pages into a single document."""
-        border = kwargs['border']
-
-        page_width = kwargs['page_width']
-        page_height = kwargs['page_height']
-
-        label_width = kwargs['label_width']
-        label_height = kwargs['label_height']
-
-        n_rows = kwargs['n_rows']
-        n_cols = kwargs['n_cols']
 
         inner = ''.join(pages)
 
         # Generate styles for individual cells (on each page)
         cell_styles = []
 
-        for row in range(n_rows):
+        for row in range(sheet_layout.rows):
             cell_styles.append(
                 f"""
             .label-sheet-row-{row} {{
-                top: {row * label_height}mm;
+                top: {sheet_layout.row_position_top(row)}mm;
             }}
             """
             )
 
-        for col in range(n_cols):
+        for col in range(sheet_layout.columns):
             cell_styles.append(
                 f"""
             .label-sheet-col-{col} {{
-                left: {col * label_width}mm;
+                left: {sheet_layout.column_position_left(col)}mm;
             }}
             """
             )
@@ -304,7 +378,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
         <head>
             <style>
                 @page {{
-                    size: {page_width}mm {page_height}mm;
+                    size: {sheet_layout.page_size.width}mm {sheet_layout.page_size.height}mm;
                     margin: 0mm;
                     padding: 0mm;
                 }}
@@ -312,7 +386,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                 .label-sheet-table {{
                     page-break-after: always;
                     table-layout: fixed;
-                    width: {page_width}mm;
+                    width: {sheet_layout.page_size.width}mm;
                     border-spacing: 0mm 0mm;
                 }}
 
@@ -321,11 +395,24 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                 }}
 
                 .label-sheet-cell {{
-                    border: {'1px solid #000;' if border else '0mm;'}
-                    width: {label_width}mm;
-                    height: {label_height}mm;
+                    width: {sheet_layout.label_width}mm;
+                    height: {sheet_layout.label_height}mm;
                     padding: 0mm;
                     position: absolute;
+                    {'background-color: ' + fill_color + ';' if fill_color not in ["", "unset"] else ''};
+                    border-radius: {sheet_layout.corner_radius}mm;
+                }}
+
+                .label-sheet-cell-overlay {{
+                    border: {'0.25mm solid #000' if enable_border else '0mm'};
+                    border-radius: {sheet_layout.corner_radius}mm;
+                    box-sizing: border-box;
+                    width: {sheet_layout.label_width}mm;
+                    height: {sheet_layout.label_height}mm;
+                    padding: 0mm;
+                    position: absolute;
+                    top: 0px;
+                    left: 0px;
                 }}
 
                 {cell_styles}
