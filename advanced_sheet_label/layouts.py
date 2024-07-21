@@ -68,7 +68,7 @@ class SheetLayout:
         return self.spacing_left_computed + column * (self.label_width + self.column_spacing)
 
     def __str__(self) -> str:
-        return f"{self.display_name} ({self.page_size.display_name}, {self.label_width}mm x {self.label_height}mm, {self.columns} columns x {self.rows} rows, {'rounded' if self.corner_radius is not None else 'straight'})"
+        return f"{self.display_name} ({self.page_size.display_name}, {self.label_width}mm x {self.label_height}mm, {self.columns} columns x {self.rows} rows, {'round corners' if self.corner_radius != 0 else 'sharp corners'})"
 
 PAPER_SIZES = {
     "A4": PaperSize("A4", 210, 297)
@@ -100,12 +100,13 @@ LAYOUTS = {
 }
 
 LAYOUT_SELECT_OPTIONS = [
+    ("auto_round", "Auto (round) - Automatically detect correct layout for label template according to metadata or size (prefer round-corner labels)"),
+    ("auto_sharp", "Auto (sharp) - Automatically detect correct layout for label template according to metadata or size (prefer sharp-corner labels)")
+] + [
     (
         code, 
         str(layout)
     ) 
     for code, layout in LAYOUTS.items()
-] + [
-    ("auto_round", "Auto (round) - Automatically detect correct layout for label template according to metadata or size (prefer round-corner labels)"),
-    ("auto_sharp", "Auto (sharp) - Automatically detect correct layout for label template according to metadata or size (prefer sharp-corner labels)")
 ]
+

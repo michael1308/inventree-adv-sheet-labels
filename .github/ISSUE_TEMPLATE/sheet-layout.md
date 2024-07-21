@@ -14,7 +14,7 @@ Just in case something needs to be verified or anyone wants to get any:
 
 **Page size configuration**
 
-See [here](https://github.com/melektron/inventree-adv-sheet-label/blob/2657b0b59687db1a6dd2fcefe2d8641dca89b565/advanced_sheet_label/layouts.py#L73) which paper sizes are already defined. If your paper size is not defined yet, please define it as follows:
+See [here](https://github.com/melektron/inventree-adv-sheet-label/blob/main/advanced_sheet_label/layouts.py#L73) which paper sizes are already defined. If your paper size is not defined yet, please define it as follows:
 
 ```python
 # change the dimensions and names to your paper size
