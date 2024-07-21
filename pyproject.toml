@@ -8,7 +8,7 @@ version = "1.0.0"
 authors = [
   { name="melektron", email="matteo@elektron.work" },
 ]
-description = "Advanced sheet label printing plugin for InvenTree which adds more features to the included plugin including printing on off-the-shelf label paper layouts"
+description = "A label printing plugin for InvenTree which provides support for printing labels on off-the-shelf label sheet layouts and adds some more useful features."
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
 classifiers = [

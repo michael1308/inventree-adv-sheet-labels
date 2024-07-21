@@ -89,7 +89,7 @@ class AdvancedLabelPrintingOptionsSerializer(serializers.Serializer):
 
     fill_color = serializers.CharField(
         label="Debug: Label fill color",
-        help_text="Background color to fill the all the labels with. This helps make the shape and size clearer for testing.",
+        help_text="Background color to fill all the labels with. This helps make the shape and size clearer for testing.",
         default="unset"
     )
 
@@ -104,7 +104,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
 
     NAME = 'AdvancedLabelSheet'
     TITLE = 'Advanced Label Sheet Printer'
-    DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets with advanced layout options'
+    DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets additional useful features'
     VERSION = '1.0.0'
     AUTHOR = 'InvenTree contributors & melektron'
 
@@ -112,14 +112,14 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
 
     SETTINGS = {
         "DEFAULT_LAYOUT": {
-            "name": "Default Sheet Layout",
+            "name": "Default sheet layout",
             "description": "The default sheet layout selection when printing labels",
             "choices": LAYOUT_SELECT_OPTIONS,
             "default": LAYOUT_SELECT_OPTIONS[0][0],
             "required": True
         },
         "LABEL_SKIP_COUNTER": {
-            "name": "Label Skip Counter",
+            "name": "Label skip counter",
             "description": "Global counter for auto-incrementing the default amount of labels to skip when printing. If page is full, this wraps back to zero accordingly.",
             "default": 0,
             "validator": [
