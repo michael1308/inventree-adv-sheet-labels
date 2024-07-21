@@ -25,7 +25,7 @@ A label printing plugin for [InvenTree](https://inventree.org) which provides su
 
 The simplest way of installing is by using the ```Install Plugin``` button on the InvenTree ```Plugin Settings``` page and then entering the package name:
 
-![Plugin installation via UI: The "Install Plugin" modal window](images/install_via_ui.png)
+![Plugin installation via UI: The "Install Plugin" modal window](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/install_via_ui.png)
 
 Alternatively, you can install this plugin manually in the InvenTree container as follows:
 
@@ -41,13 +41,13 @@ inventree-adv-sheet-label
 
 In any case, after installation, the plugin needs to be enabled in the above mentioned plugin settings page:
 
-![Plugin list with mouse cursor over "Enable Plugin" button](images/enable_plugin.png)
+![Plugin list with mouse cursor over "Enable Plugin" button](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/enable_plugin.png)
 
 ## Usage and Features
 
 This plugin adds the "AdvancedLabelSheet" printing option to the label printing dialog:
 
-![Printing dialog with plugin selection open](images/plugin_selection.png)
+![Printing dialog with plugin selection open](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/plugin_selection.png)
 
 ### Sheet layout
 
@@ -55,7 +55,7 @@ Unlike the builtin sheet label printing plugin of InvenTree, this plugin present
 
 You can select the layout corresponding your paper in the ```Sheet layout``` dropdown:
 
-!["Sheet layout" dropdown in open state, with various layout options shown](images/sheet_layout_select.png)
+!["Sheet layout" dropdown in open state, with various layout options shown](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/sheet_layout_select.png)
 
 These layouts are identified by a four digit number written on the paper packaging, which (as far as I can tell) is unique to the layout independent of the manufacturer (at least where I live). The identifier is however just a string, so any other scheme can also be used in the future.
 
@@ -85,21 +85,21 @@ You can also select one of the two ```Auto``` sheet layout presets. These will a
 
 The ```Number of labels``` field lets you print multiple of the same label in one go. By default, the number of labels printed is 1, resulting in an output like this:
 
-![Top of a page with one label printed on it](images/one_label.png)
+![Top of a page with one label printed on it](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/one_label.png)
 (The label template is only an example and this is only part of a page)
 
 Let's say you want to print two of the same label. By entering the desired amount in the field, multiple of the same label will be printed at once, of course arranged according to the selected layout:
 
-![Top of a page with two identical labels printed on it](images/two_identical_labels.png)
+![Top of a page with two identical labels printed on it](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/two_identical_labels.png)
 
 If you are printing labels for multiple items at once, such as for an entire selection of parts, this amount is applied to all items. For example, lets print two labels for each of those four capacitors:
 
-![Selection of multiple items to print labels for](images/multi_item_select.png)
-![Configuration for multi label print](images/multi_label_print_config.png)
+![Selection of multiple items to print labels for](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/multi_item_select.png)
+![Configuration for multi label print](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/multi_label_print_config.png)
 
 This results in a printout looking like this:
 
-![Top of a page with two labels each for four parts into total](images/multi_item_multi_labels.png)
+![Top of a page with two labels each for four parts into total](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/multi_item_multi_labels.png)
 
 You can also specify to print zero labels. This is useful in combination with the "Skip label positions" and "Debug: Print border" options to print an empty grid of cells for testing.
 
@@ -109,15 +109,15 @@ When printing on label sheets, it is likely that you don't use up the entire she
 
 For example, let's assume the first two labels are already used up and we want to start printing at the third one:
 
-![Settings for printing two labels, skipping the first two positions](images/skip_two_positions_config.png)
+![Settings for printing two labels, skipping the first two positions](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/skip_two_positions_config.png)
 
 This results in the following output:
 
-![Page with two labels printed and the first two positions skipped](images/skip_two_positions_result.png)
+![Page with two labels printed and the first two positions skipped](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/skip_two_positions_result.png)
 
 When printing small labels with many of them on a single sheet, it can be confusing and annoying to keep track of the amount of labels skipped. Since this is such a common task, the plugin automatically remembers how many labels have been used up already and populates the ```Skip label positions``` field with the correct number of labels to skip after the previous printing operations. For example, after the above shown printing operation, the plugin automatically remembers that next time, it needs to skip four labels and pre-populates the field with that value:
 
-![Skip label positions field pre-populated with correct skip amount](images/skip_positions_pre_populated.png)
+![Skip label positions field pre-populated with correct skip amount](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/skip_positions_pre_populated.png)
 
 When an entire page or more is used up, this counter automatically wraps around to the correct value for the next page.
 
@@ -129,13 +129,13 @@ Of course, this feature only makes sense when printing a lot of labels on the sa
 To ensure the desired result, the plugin automatically check whether the size of the label according to the selected template matches the size of the labels on the selected sheet layout. 
 
 If that is not the case, the user is presented with an error message. This can happen in a few different scenarios:
-- Manually selecting a sheet layout that doesn't match the label template: ![Error selected layout size does not match](images/err_selected_layout.png)
-- When automatic layout selection is enabled and the label template specifies a sheet layout but its label size does not match that of the template: ![Error template metadata layout does not have the expected size](images/err_metadata_layout.png)
-- When automatic layout selection is enabled but the label template doesn't specify any layout in the metadata and no exact size match was found: ![Error no metadata and no exact size match found](images/err_no_size_match.png)
+- Manually selecting a sheet layout that doesn't match the label template: ![Error selected layout size does not match](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/err_selected_layout.png)
+- When automatic layout selection is enabled and the label template specifies a sheet layout but its label size does not match that of the template: ![Error template metadata layout does not have the expected size](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/err_metadata_layout.png)
+- When automatic layout selection is enabled but the label template doesn't specify any layout in the metadata and no exact size match was found: ![Error no metadata and no exact size match found](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/err_no_size_match.png)
 
 In any of these cases, you might want to continue anyway, e.g. because you may not have the correct sheet at hand. To do so, you can enable the ```Ignore label size mismatch``` switch to override these safety checks and print anyway. If the label template doesn't fit exactly, it is aligned at the top left corner of the physical label. The result might look something like this:
 
-![Label printed on larger label sheet layout](images/layout_larger_than_template.png)
+![Label printed on larger label sheet layout](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/layout_larger_than_template.png)
 
 
 ### Print border
@@ -146,7 +146,7 @@ When skipping labels, the skipped positions also have a border.
 
 The result looks something like this:
 
-![Label sheet with border](images/sheet_with_border.png)
+![Label sheet with border](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/sheet_with_border.png)
 
 
 ### Label fill color
@@ -155,7 +155,7 @@ Similarly to the border, you might want to fill the background of the labels wit
 
 The result might look something like this with color "lightgreen":
 
-![Labels with lightgreen fill colo ](images/fill_lightgreen.png)
+![Labels with lightgreen fill colo ](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/fill_lightgreen.png)
 (White lines between rows are just rendering defects if my browser)
 
 You can also combine this option with the border.
@@ -167,7 +167,7 @@ In addition to the errors covered in section [Ignore label size mismatch](#ignor
 
 - **Sheet layout '[sheet_layout_code]' does not exist.**: This means that an API request was received with an invalid sheet layout in the selection. During normal operation, this should never happen because the dropdown list is automatically populated with all valid options. If you are using the API from a 3rd party application, this could mean that the application has requested to print using a sheet layout which is either not supported by this plugin or the application has a typo in the sheet layout code.
 - **No labels were generated**: This means that you are not printing any labels (Number of labels = 0) and are not generating any empty fields either (Skip label positions = 0). This would result in a blank page and is likely not what you want.
-- **Error printing label**: This error along with another error box containing a Python exception string means that something has gone wrong in the plugin code that is not an intentional error message. Example: ![Unintentional plugin error](images/err_unintentional.png)If you see this, feel free to file a bug report. See [Reporting and fixing bugs](#reporting-and-fixing-bugs) on how to do so.
+- **Error printing label**: This error along with another error box containing a Python exception string means that something has gone wrong in the plugin code that is not an intentional error message. Example: ![Unintentional plugin error](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/err_unintentional.png)If you see this, feel free to file a bug report. See [Reporting and fixing bugs](#reporting-and-fixing-bugs) on how to do so.
 
 
 ## Settings
@@ -191,7 +191,7 @@ If you have encountered a problem or a bug with the plugin, please file an [Issu
 
 The template requires you to provide a screenshot of your label template configuration. You can get this by going to https://your.inventree.url/admin/report/labeltemplate/ and selecting the template you were trying to print when the problem ocurred. You need administrator privileges to do this. If you don't have them, ask your administrator. This page might look something like this:
 
-![Example template configuration screenshot](images/template_config_example.png)
+![Example template configuration screenshot](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/template_config_example.png)
 
 In addition to this screenshot, you will be asked to attach the label template file which can be downloaded by clicking on the link next to "Currently:" in the above shown page. Please make sure this file doesn't contain any confidential data and remove it if it does.
 
@@ -249,7 +249,7 @@ Make sure that the layout codes (the strings before the colon) are UNIQUE, other
 
 To install the modified plugin in your InvenTree instance, simply enter **YOUR** repository link instead of the package name in the installation modal. Example with this repository:
 
-![Install plugin from VCS](images/install_from_vcs.png)
+![Install plugin from VCS](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/install_from_vcs.png)
 
 > Make sure to uninstall the official plugin before you install your fork, otherwise they will conflict!
 
