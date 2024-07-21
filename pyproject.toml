@@ -21,5 +21,8 @@ classifiers = [
 Homepage = "https://github.com/melektron/inventree-adv-sheet-label"
 Issues = "https://github.com/melektron/inventree-adv-sheet-label/issues"
 
+[tool.setuptools]
+packages = ["advanced_sheet_label"]
+
 [project.entry-points."inventree_plugins"]
 AdvancedSheetLabel = 'advanced_sheet_label.printing_plugin:AdvancedLabelSheetPlugin'
