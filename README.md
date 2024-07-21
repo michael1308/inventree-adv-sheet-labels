@@ -23,6 +23,9 @@ A label printing plugin for [InvenTree](https://inventree.org) which provides su
 
 ## Installation
 
+> Note:
+> This plugin currently supports InvenTree versions **0.15.x**. As of writing, version **0.16.x** is under development and it's new API is partially supported. However, since that might still change at any time, compatibility is not yet guaranteed.
+
 The simplest way of installing is by using the ```Install Plugin``` button on the InvenTree ```Plugin Settings``` page and then entering the package name:
 
 ![Plugin installation via UI: The "Install Plugin" modal window](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/install_via_ui.png)
@@ -252,6 +255,13 @@ To install the modified plugin in your InvenTree instance, simply enter **YOUR**
 ![Install plugin from VCS](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/install_from_vcs.png)
 
 > Make sure to uninstall the official plugin before you install your fork, otherwise they will conflict!
+
+> It appears that this doesn't work. It also didn't seem to work when placing the "git+..." URL in package field in the UI. For me, I have been able to install the plugin directly from GitHub by stopping the InvenTree server and then installing directly using pip:
+> ```bash
+> pip uninstall inventree-adv-sheet-label # uninstall normal package
+> pip install git+https://github.com/melektron/inventree-adv-sheet-label.git
+> ```
+> You have to adjust the link to your repo. 
 
 If you have added a sheet layout yourself, you are still encouraged to [create a Pull Request](https://github.com/melektron/inventree-adv-sheet-label/compare) with your changes so the changes can be added to the mainline plugin for everyone to benefit.
 

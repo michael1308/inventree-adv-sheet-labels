@@ -5,8 +5,6 @@ arranged according to standard label sheets.
 
 import logging
 import math
-import random
-import typing
 
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -17,17 +15,23 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.request import Request
 import weasyprint
 from rest_framework import serializers
-
-import report.helpers
+from label.models import LabelTemplate
 from plugin import InvenTreePlugin
 from plugin.mixins import LabelPrintingMixin, SettingsMixin
-from report.models import LabelOutput, LabelTemplate
+
+version_pre_0_16_x: bool = ...
+try:
+    from label.models import LabelOutput, LabelTemplate     # for current stable version (0.15.x)
+    version_pre_0_16_x = True
+except ImportError:
+    from report.models import LabelOutput, LabelTemplate    # for newer versions (0.16.x)
+    version_pre_0_16_x = False
 
 from .layouts import SheetLayout, LAYOUTS, LAYOUT_SELECT_OPTIONS
 
 
-_log = logging.getLogger('inventree')
-_log.setLevel(logging.DEBUG)
+_log = logging.getLogger('inventree-adv-sheet-label')
+#_log.setLevel(logging.DEBUG)
 _plugin_instance: "AdvancedLabelSheetPlugin" = ...
 
 
@@ -105,7 +109,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
     NAME = 'AdvancedLabelSheet'
     TITLE = 'Advanced Label Sheet Printer'
     DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets additional useful features'
-    VERSION = '1.0.1'
+    VERSION = '1.0.2'
     AUTHOR = 'InvenTree contributors & melektron'
 
     BLOCKING_PRINT = True
@@ -211,14 +215,46 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
 
         # no exact matches found
         return closest_match[1], False, False
+    
+    if version_pre_0_16_x:
+        def print_labels(
+            self, label: LabelTemplate, items: list, request: Request, **kwargs
+        ):
+            """
+            Printing interface for InvenTree 0.15.x (current stable)
+            """
+            output_file = ContentFile(self._print_labels(label, items, request, **kwargs), 'labels.pdf')
+            output = LabelOutput.objects.create(label=output_file, user=request.user)
+            return JsonResponse({
+                'file': output.label.url,
+                'success': True,
+                'message': f'{len(items)} labels generated',
+            })
         
-    def print_labels(
-        self, label: LabelTemplate, output: LabelOutput, input_items: list, request, **kwargs
-    ):
+    else:
+        def print_labels(
+            self, label: LabelTemplate, output: LabelOutput, items: list, request, **kwargs
+        ):
+            """
+            Printing interface for InvenTree 0.16.x (currently not released yet)
+            """
+            output.output = ContentFile(self._print_labels(label, items, request, **kwargs), 'labels.pdf')
+            output.progress = 100
+            output.complete = True
+            output.save()
+        
+    def _print_labels(
+        self, label: LabelTemplate, input_items: list, request, **kwargs
+    ) -> bytes:
         """
         Handle printing of the provided labels.
         Note that we override the entire print_label**s** method for this plugin
         so we can arrange them all on pages.
+
+        This function is an internal function which returns the rendered PDF document.
+        The responding and uploading is handled by one of the two defined print_label()
+        functions depending on whether we are running in InvenTree v0.15.x or v0.16.x because
+        the API has changed since then
         """
 
         # extract the printing options from request
@@ -239,7 +275,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                 if specified:
                     raise ValidationError(f"The layout specified in the template metadata (<i>{str(sheet_layout)}</i> ) does not have the correct label size. Select '<i>Ignore label size mismatch</i>' to use it anyway.")
                 else:
-                    raise ValidationError(f"The template does not specify any valid sheet layout to use and no exact size match was found. <i>{str(sheet_layout)}</i> is the closest contender. Select '<i>Ignore label size mismatch</i>' to use it.")
+                    raise ValidationError(f"The template ({label.width}mm x {label.height}mm) does not specify any valid sheet layout to use and no exact size match was found. <i>{str(sheet_layout)}</i> is the closest contender. Select '<i>Ignore label size mismatch</i>' to use it.")
         else:   # explicit layout selection
             try:
                 sheet_layout = LAYOUTS[sheet_layout_code]
@@ -283,12 +319,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
 
         # render HTML to PDF
         html = weasyprint.HTML(string=html_data)
-        document = html.render().write_pdf()
-
-        output.output = ContentFile(document, 'labels.pdf')
-        output.progress = 100
-        output.complete = True
-        output.save()
+        return html.render().write_pdf()
 
     def print_page(self, label: LabelTemplate, items: list, request, sheet_layout: SheetLayout):
         """Generate a single page of labels.
@@ -325,9 +356,14 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
                     try:
                         # Render the individual label template
                         # Note that we disable @page styling for this
-                        cell = label.render_as_string(
-                            items[idx], request, insert_page_style=False
-                        )
+                        if version_pre_0_16_x:
+                            cell = label.render_as_string(
+                                request, target_object=items[idx], insert_page_style=False
+                            )
+                        else:
+                            cell = label.render_as_string(
+                                items[idx], request, insert_page_style=False
+                            )
                         html += cell
                     except Exception as exc:
                         _log.exception('Error rendering label: %s', str(exc))
