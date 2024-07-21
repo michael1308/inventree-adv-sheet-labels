@@ -60,7 +60,7 @@ You can select the layout corresponding your paper in the ```Sheet layout``` dro
 
 !["Sheet layout" dropdown in open state, with various layout options shown](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/sheet_layout_select.png)
 
-These layouts are identified by a four digit number written on the paper packaging, which (as far as I can tell) is unique to the layout independent of the manufacturer (at least where I live). The identifier is however just a string, so any other scheme can also be used in the future.
+These layouts are identified by a several digit number written on the paper packaging, which (as far as I can tell) is unique to the layout independent of the manufacturer (at least where I live). The identifier is however just a string, so any other scheme can also be used in the future.
 
 The dropdown list also shows some additional information about the layout for orientation:
 
@@ -71,10 +71,13 @@ The dropdown list also shows some additional information about the layout for or
 
 Currently supported layouts:
 
-| Layout Identifier | Paper size | Label dimensions | Label layout | Corner style |
-| ----------------- | ---------- | ---------------- | -------------| ------------ |
-| 4780 | A4 | 48.5mm x 25.4mm | 4 columns x 10 rows | sharp | 
-| 4737 | A4 | 63.5mm x 29.6mm | 3 columns x 9 rows | round | 
+| Layout Identifier | Paper size | Label dimensions | Label layout        | Corner style |
+| ----------------- | ---------- | ---------------- | ------------------- | ------------ |
+| 4780              | A4         | 48.5mm x 25.4mm  | 4 columns x 10 rows | sharp        | 
+| 4737              | A4         | 63.5mm x 29.6mm  | 3 columns x 9 rows  | round        | 
+| 4201              | A4         | 45.7mm x 16.9mm  | 4 columns x 16 rows | round        |
+| 7160-10           | A4         | 63.5mm x 38.1mm  | 3 columns x 7 rows  | round        |
+| 4360              | A4         | 70.0mm x 36.0mm  | 3 columns x 8 rows  | sharp        |
 
 As of right now, this selection is limited to whatever layouts I personally own and use. If the paper layout you need is not included, please file an [Issue with the "Sheet Layout" template](https://github.com/melektron/inventree-adv-sheet-label/issues/new?assignees=melektron&labels=sheet+layout&projects=&template=sheet-layout.md&title=New+Sheet+layout%3A+%5Blayout+name%5D). See the [Adding new layouts](#adding-new-layouts) for details.
 

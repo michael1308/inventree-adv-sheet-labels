@@ -96,6 +96,39 @@ LAYOUTS = {
         column_spacing=2.54,
         row_spacing=0,
         corner_radius=3
+    ),
+    "4201": SheetLayout(
+        display_name="4201",
+        page_size=PAPER_SIZES["A4"],
+        label_width=45.7,
+        label_height=16.9,
+        columns=4,
+        rows=16,
+        column_spacing=2.6,
+        row_spacing=0,
+        corner_radius=2
+    ),
+    "7160-10": SheetLayout(
+        display_name="7160-10",
+        page_size=PAPER_SIZES["A4"],
+        label_width=63.5,
+        label_height=38.1,
+        columns=3,
+        rows=7,
+        column_spacing=2.54,
+        row_spacing=0,
+        corner_radius=2.54
+    ),
+    "4360": SheetLayout(
+        display_name="4360",
+        page_size=PAPER_SIZES["A4"],
+        label_width=70.0,
+        label_height=36.0,
+        columns=3,
+        rows=8,
+        column_spacing=0,
+        row_spacing=0,
+        corner_radius=0
     )
 }
 
