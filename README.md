@@ -2,6 +2,25 @@
 
 A label printing plugin for [InvenTree](https://inventree.org) which provides support for printing labels on off-the-shelf label sheet layouts and adds some more useful features compared to the sheet label plugin included with InvenTree.
 
+## Index
+
+1. [Installation](#installation)
+1. [Usage and Features](#usage-and-features)
+    1. [Sheet layout](#sheet-layout)
+    1. [Number of labels](#number-of-labels)
+    1. [Skip label positions](#skip-label-positions)
+    1. [Ignore label size mismatch](#ignore-label-size-mismatch)
+    1. [Print border](#print-border)
+    1. [Label fill color](#label-fill-color)
+1. [Errors](#errors)
+1. [Settings](#settings)
+    1. [Default sheet layout](#default-sheet-layout)
+1. [Contribution](#contribution)
+    1. [Reporting and fixing bugs](#reporting-and-fixing-bugs)
+    1. [Adding new layouts](#adding-new-layouts)
+1. [Plugin development setup](#plugin-development-setup)
+
+
 ## Installation
 
 The simplest way of installing is by using the ```Install Plugin``` button on the InvenTree ```Plugin Settings``` page and then entering the package name:
