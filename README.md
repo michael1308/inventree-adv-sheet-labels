@@ -161,7 +161,7 @@ This setting allows you to specify which sheet layout is selected by default whe
 
 ## Contribution
 
-If you have ideas for new features, have encountered a bug or want to add more sheet layouts, feel free to contribute to this plugin by [filing an Issue](https://github.com/melektron/inventree-adv-sheet-label/issues/new/choose) or [creating a Pull Request](https://github.com/melektron/inventree-adv-sheet-label/compare). See [Plugin development setup](#plugin-development-setup) to learn how you can set up your development environment to test your modifications.
+If you have ideas for new features, found typos, have encountered a bug or want to add more sheet layouts, feel free to contribute to this plugin by [filing an Issue](https://github.com/melektron/inventree-adv-sheet-label/issues/new/choose) or [creating a Pull Request](https://github.com/melektron/inventree-adv-sheet-label/compare). See [Plugin development setup](#plugin-development-setup) to learn how you can set up your development environment to test your modifications.
 
 See the below information and instructions for common contribution types.
 
