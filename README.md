@@ -24,7 +24,7 @@ A label printing plugin for [InvenTree](https://inventree.org) which provides su
 ## Installation
 
 > Note:
-> This plugin currently supports InvenTree versions **0.15.x**. As of writing, version **0.16.x** is under development and it's new API is partially supported. However, since that might still change at any time, compatibility is not yet guaranteed.
+> This plugin currently supports InvenTree versions **0.15.x**. As of writing, version **0.16.x** is under development and its new API is partially supported. However, since that might still change at any time, compatibility is not yet guaranteed.
 
 The simplest way of installing is by using the ```Install Plugin``` button on the InvenTree ```Plugin Settings``` page and then entering the package name:
 
@@ -54,7 +54,7 @@ This plugin adds the "AdvancedLabelSheet" printing option to the label printing 
 
 ### Sheet layout
 
-Unlike the builtin sheet label printing plugin of InvenTree, this plugin presents a selection of preconfigured sheet label layout options corresponding to various kinds off-the-shelf label printing paper that can be purchased from most office supply shops and easily printed on any standard 2D printer.
+Unlike the builtin sheet label printing plugin of InvenTree, this plugin presents a selection of preconfigured sheet label layout options corresponding to various kinds of off-the-shelf label printing paper that can be purchased from most office supply shops and easily printed on any standard 2D printer.
 
 You can select the layout corresponding your paper in the ```Sheet layout``` dropdown:
 
@@ -80,7 +80,7 @@ As of right now, this selection is limited to whatever layouts I personally own 
 
 You can also select one of the two ```Auto``` sheet layout presets. These will automatically select the correct sheet layout for the label template you are printing. This is done in one of three ways:
 - If you have a specific layout that's always used for a specific template, you can add the ```{"sheet_layout": "..."}``` metadata key to your label template configuration (replace ... with the identifier of the layout. This might not be the same as the display name, see [here](https://github.com/melektron/inventree-adv-sheet-label/blob/main/advanced_sheet_label/layouts.py#L77) what the identifier is). This is the cleanest way configure the correct layout for your templates.
-- If the selected template template has no such metadata, the plugin will attempt to find a layout with exactly the required label size and use that one. If multiple matches are found, the first on is selected while preferring ones with round or sharp corners depending on your selection.
+- If the selected template template has no such metadata, the plugin will attempt to find a layout with exactly the required label size and use that one. If multiple matches are found, the first one is selected while preferring ones with round or sharp corners depending on your selection.
 - If no exact matches are found, the closest layout that can fit your label template will be selected and shown to the user in an error message. The user can then decide to use this option by selecting the ['Ignore label size mismatch'](#ignore-label-size-mismatch) switch. 
 
 
@@ -143,7 +143,7 @@ In any of these cases, you might want to continue anyway, e.g. because you may n
 
 ### Print border
 
-When debugging or testing your sheet layouts and templates, it might be useful to see the shape of the physical label (e.g. for the previous image). For this purpose, you can enable the ```Debug: Print border``` switch, to print a 0.25mm border around the label. This border is aligned on the INSIDE of the label, so it doesn't overlap other labels but will cover up a tiny bit of area on the border of your label. The scale and position of the label content are not affected by the border.
+When debugging or testing your sheet layouts and templates, it might be useful to see the shape of the physical label (e.g. for the previous image). For this purpose, you can enable the ```Debug: Print border``` switch, to print a 0.25mm border around the label. This border is aligned on the INSIDE of the label, so it doesn't overlap other labels but will cover up a tiny bit of area on the edge of your label. The scale and position of the label content are not affected by the border.
 
 When skipping labels, the skipped positions also have a border.
 
@@ -159,7 +159,7 @@ Similarly to the border, you might want to fill the background of the labels wit
 The result might look something like this with color "lightgreen":
 
 ![Labels with lightgreen fill colo ](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/fill_lightgreen.png)
-(White lines between rows are just rendering defects if my browser)
+(White lines between rows are just rendering defects of my browser)
 
 You can also combine this option with the border.
 
@@ -192,13 +192,13 @@ See the below information and instructions for common contribution types.
 
 If you have encountered a problem or a bug with the plugin, please file an [Issue with the Bug Report template](https://github.com/melektron/inventree-adv-sheet-label/issues/new?assignees=melektron&labels=bug&projects=&template=bug-report.md&title=). 
 
-The template requires you to provide a screenshot of your label template configuration. You can get this by going to https://your.inventree.url/admin/report/labeltemplate/ and selecting the template you were trying to print when the problem ocurred. You need administrator privileges to do this. If you don't have them, ask your administrator. This page might look something like this:
+The template requires you to provide a screenshot of your label template configuration. You can get this by going to https://your.inventree.url/admin/label/ for InvenTree 0.15.x or https://your.inventree.url/admin/report/labeltemplate/ for InvenTree 0.16.x and selecting the template you were trying to print when the problem ocurred. You need administrator privileges to do this. If you don't have them, ask your administrator. This page might look something like this:
 
 ![Example template configuration screenshot](https://raw.githubusercontent.com/melektron/inventree-adv-sheet-label/main/images/template_config_example.png)
 
 In addition to this screenshot, you will be asked to attach the label template file which can be downloaded by clicking on the link next to "Currently:" in the above shown page. Please make sure this file doesn't contain any confidential data and remove it if it does.
 
-You will also be asked to provide some other information about the when and how the bug ocurred which is described in the template.
+You will also be asked to provide some other information about when and how the bug ocurred which is described in the template.
 
 #### PRs
 
@@ -212,7 +212,7 @@ In the template you will be asked to provide some basic information about the sh
 
 Then, you will be presented with a code template of a layout configuration which you must fill out with your values. The options are commented and mostly self-explanatory.
 
-If your layout uses a page size that has never been used before, you will also be asked to define the paper format with a name and it's dimensions. Otherwise you can simply reference an existing format and omit that part of the issue template.
+If your layout uses a page size that has never been used before, you will also be asked to define the paper format with a name and its dimensions. Otherwise you can simply reference an existing format and omit that part of the issue template.
 
 #### Adding sheet layouts yourself
 

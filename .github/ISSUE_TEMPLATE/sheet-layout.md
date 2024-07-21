@@ -27,7 +27,7 @@ Otherwise, you can remove this section from the issue.
 
 **Layout configuration**
 
-Fill out the following sheet label definition with the values of your layout:
+Fill out the following sheet layout definition with the values of your layout:
 
 ```python
 # replace the below values with your values
