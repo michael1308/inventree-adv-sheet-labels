@@ -108,6 +108,17 @@ LAYOUTS = {
         row_spacing=0,
         corner_radius=2
     ),
+    "7120-25": SheetLayout(
+        display_name="7120-25",
+        page_size=PAPER_SIZES["A4"],
+        label_width=35,
+        label_height=35,
+        columns=5,
+        rows=7,
+        column_spacing=5,
+        row_spacing=5,
+        corner_radius=0
+    ),
     "7160-10": SheetLayout(
         display_name="7160-10",
         page_size=PAPER_SIZES["A4"],
