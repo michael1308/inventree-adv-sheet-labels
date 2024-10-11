@@ -76,6 +76,7 @@ Currently supported layouts:
 | 4780              | A4         | 48.5mm x 25.4mm  | 4 columns x 10 rows | sharp        | 
 | 4737              | A4         | 63.5mm x 29.6mm  | 3 columns x 9 rows  | round        | 
 | 4201              | A4         | 45.7mm x 16.9mm  | 4 columns x 16 rows | round        |
+| 7120-25           | A4         | 35.0mm x 35.0mm  | 5 columns x 7 rows  | sharp        |
 | 7160-10           | A4         | 63.5mm x 38.1mm  | 3 columns x 7 rows  | round        |
 | 4360              | A4         | 70.0mm x 36.0mm  | 3 columns x 8 rows  | sharp        |
 

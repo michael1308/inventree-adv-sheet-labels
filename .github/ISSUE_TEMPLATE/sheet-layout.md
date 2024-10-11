@@ -11,6 +11,7 @@ assignees: melektron
 Just in case something needs to be verified or anyone wants to get any:
 - Brand(s) and/or supplier(s) if available: '...'
 - Online product link and/or supplier/manufacturer item number: ...
+- Image of the physical label sheet if possible (online information is not always clear)
 
 **Page size configuration**
 
