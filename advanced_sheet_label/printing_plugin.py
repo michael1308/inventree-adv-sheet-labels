@@ -15,7 +15,6 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.request import Request
 import weasyprint
 from rest_framework import serializers
-from label.models import LabelTemplate
 from plugin import InvenTreePlugin
 from plugin.mixins import LabelPrintingMixin, SettingsMixin
 
@@ -109,7 +108,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
     NAME = 'AdvancedLabelSheet'
     TITLE = 'Advanced Label Sheet Printer'
     DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets additional useful features'
-    VERSION = '1.1.0'
+    VERSION = '1.1.1'
     AUTHOR = 'InvenTree contributors & melektron'
 
     BLOCKING_PRINT = True

@@ -24,7 +24,7 @@ A label printing plugin for [InvenTree](https://inventree.org) which provides su
 ## Installation
 
 > Note:
-> This plugin currently supports InvenTree versions **0.15.x**. As of writing, version **0.16.x** is under development and its new API is partially supported. However, since that might still change at any time, compatibility is not yet guaranteed.
+> This plugin currently supports InvenTree versions **0.15.x** and **0.16.x** (with version **0.16.5**). Some older or newer versions might also work, but have not been tested. 
 
 The simplest way of installing is by using the ```Install Plugin``` button on the InvenTree ```Plugin Settings``` page and then entering the package name:
 
