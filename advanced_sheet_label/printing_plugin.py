@@ -108,7 +108,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
     NAME = 'AdvancedLabelSheet'
     TITLE = 'Advanced Label Sheet Printer'
     DESCRIPTION = 'Arrays multiple labels onto single, standard layout label sheets with additional useful features'
-    VERSION = '1.2.0'
+    VERSION = '1.2.1'
     AUTHOR = 'InvenTree contributors & melektron'
 
     BLOCKING_PRINT = True
@@ -166,7 +166,7 @@ class AdvancedLabelSheetPlugin(LabelPrintingMixin, SettingsMixin, InvenTreePlugi
             exact: whether the result size matches exactly or not
         """
         # check for specified info in metadata:
-        if "sheet_layout" in label.metadata:
+        if isinstance(label.metadata, dict) and "sheet_layout" in label.metadata:
             layout_code = str(label.metadata["sheet_layout"])
             if layout_code in LAYOUTS:
                 layout = LAYOUTS[layout_code]
