@@ -71,7 +71,8 @@ class SheetLayout:
         return f"{self.display_name} ({self.page_size.display_name}, {self.label_width}mm x {self.label_height}mm, {self.columns} columns x {self.rows} rows, {'round corners' if self.corner_radius != 0 else 'sharp corners'})"
 
 PAPER_SIZES = {
-    "A4": PaperSize("A4", 210, 297)
+    "A4": PaperSize("A4", 210, 297),
+    "Small Label Sheet": PaperSize("A4", 132.5, 144.5)
 }
 
 LAYOUTS = {
@@ -140,6 +141,17 @@ LAYOUTS = {
         column_spacing=0,
         row_spacing=0,
         corner_radius=0
+    ),
+    "Tedi Labels": SheetLayout(
+    display_name="Tedi Labels",
+    page_size=PAPER_SIZES["Small Label Sheet"],
+    label_width=64.0,
+    label_height=33.0,
+    columns=2,
+    rows=5,
+    column_spacing=2,
+    row_spacing=2,
+    corner_radius=1
     )
 }
 
