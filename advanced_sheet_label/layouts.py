@@ -72,7 +72,7 @@ class SheetLayout:
 
 PAPER_SIZES = {
     "A4": PaperSize("A4", 210, 297),
-    "Small Label Sheet": PaperSize("A4", 132.5, 144.5)
+    "Tedi Label Sheet": PaperSize("Tedi Label Sheet", 132, 142)
 }
 
 LAYOUTS = {
@@ -145,12 +145,12 @@ LAYOUTS = {
     "Tedi Labels": SheetLayout(
     display_name="Tedi Labels",
     page_size=PAPER_SIZES["Small Label Sheet"],
-    label_width=64.0,
-    label_height=32.0,
+    label_width=66.0,
+    label_height=35.5,
     columns=2,
     rows=4,
-    column_spacing=2,
-    row_spacing=2,
+    column_spacing=0,
+    row_spacing=0,
     corner_radius=1
     )
 }
