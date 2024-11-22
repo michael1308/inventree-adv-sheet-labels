@@ -144,7 +144,7 @@ LAYOUTS = {
     ),
     "Tedi Labels": SheetLayout(
     display_name="Tedi Labels",
-    page_size=PAPER_SIZES["Small Label Sheet"],
+    page_size=PAPER_SIZES["Tedi Label Sheet"],
     label_width=66.0,
     label_height=35.5,
     columns=2,
