@@ -72,7 +72,7 @@ class SheetLayout:
 
 PAPER_SIZES = {
     "A4": PaperSize("A4", 210, 297),
-    "Tedi Label Sheet": PaperSize("Tedi Label Sheet", 132, 142)
+    "142.5x132": PaperSize("Tedi Label Sheet", 132, 142.5)
 }
 
 LAYOUTS = {
@@ -142,16 +142,44 @@ LAYOUTS = {
         row_spacing=0,
         corner_radius=0
     ),
-    "Tedi Labels": SheetLayout(
-    display_name="Tedi Labels",
-    page_size=PAPER_SIZES["Tedi Label Sheet"],
-    label_width=66.0,
-    label_height=35.5,
+    "2x4 Labels": SheetLayout(
+    display_name="2x4 Labels",
+    page_size=PAPER_SIZES["142.5x132"],
+    label_width=64.0,
+    label_height=33.0,
     columns=2,
     rows=4,
+    column_spacing=2,
+    row_spacing=2,
+    corner_radius=1,
+    spacing_top=2.25,
+    spacing_left=1
+    ),
+    "A4-12": SheetLayout(
+    display_name="A4-12",
+    page_size=PAPER_SIZES["A4"],
+    label_width=97,
+    label_height=42.3,
+    columns=2,
+    rows=6,
     column_spacing=0,
     row_spacing=0,
-    corner_radius=1
+    corner_radius=0,
+    spacing_top=21.6,
+    spacing_left=8
+    ),
+    "A4-24": SheetLayout(
+    display_name="A4-24",
+    page_size=PAPER_SIZES["A4"],
+    label_width=70,
+    label_height=36,
+    columns=3,
+    rows=8,
+    column_spacing=0,
+    row_spacing=0,
+    corner_radius=0,
+    spacing_top=4.5,
+    spacing_left=0
     )
 }
 
